@@ -57,11 +57,9 @@ char updateLFSR(lfsr_st *lfsr_obj){
     unsigned char intarnal_val = 0;
     unsigned char LFSRpolynomial[MAX_DIMENTION] = {0};
 
-    // エラー処理：指定された生成多項式の次元数が最大次元数を超過していた場合はエラーを返す
-    if(lfsr_obj->dimension > MAX_DIMENTION) return -1;
-
     // 生成多項式から生成ビット列を計算する
-    createPolynomial(lfsr_obj->dimension, LFSRpolynomial);
+    if(createPolynomial(lfsr_obj->dimension, LFSRpolynomial) != 0) return -1;
+
     for(int i = 0; i < lfsr_obj->dimension; i++){
         if(LFSRpolynomial[i] == 1){
             // [Check!] ビットシフトしたときに0でパディングされることを前提としている実装である。
@@ -91,7 +89,7 @@ char updateLFSR(lfsr_st *lfsr_obj){
  ***************************************************/
 static char createPolynomial(unsigned char dim, unsigned char* poly){
     // エラー処理：指定された生成多項式の次元数が最大次元数を超過していた場合はエラーを返す
-    if(dim > MAX_DIMENTION) return -1;
+    if((dim > MAX_DIMENTION) || (dim < 4)) return -1;
     // エラー処理：配列のポインタがNULLの場合はエラーを返す
     if(poly == 0) return -2;
 
