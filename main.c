@@ -20,12 +20,12 @@ void unitTestLFSR(void);
 int main(int argc, char** argv){
     if(argc == 1){
         /* ユーザ入力の受け付け */
-        char users_input[4];
+        char input_dim[255];
         printf("Please Input the Dimension of LFSR Polynomial.\n");
-        scanf("%255s", users_input);
+        scanf("%255s", input_dim);
 
         /* LFSRによる数列の生成 */
-        lfsr_st lfsr_obj = {(unsigned char)atoi(users_input), 1};
+        lfsr_st lfsr_obj = {(unsigned char)atoi(input_dim), (unsigned long)1};
         printf("Generate Numbers by LFSR.\n");
         for(int i = 0; i < (int)pow(2.0, lfsr_obj.dimension) - 1; i++){
             if(updateLFSR(&lfsr_obj) == 0){
@@ -57,7 +57,7 @@ char updateLFSR(lfsr_st *lfsr_obj){
     unsigned char intarnal_val = 0;
     unsigned char LFSRpolynomial[MAX_DIMENTION] = {0};
 
-    // 生成多項式から生成ビット列を計算する
+    /* 生成多項式の取得 */
     if(createPolynomial(lfsr_obj->dimension, LFSRpolynomial) != 0) return -1;
 
     for(int i = 0; i < lfsr_obj->dimension; i++){
@@ -72,7 +72,7 @@ char updateLFSR(lfsr_st *lfsr_obj){
             intarnal_val = (x1 & not_x2) | (not_x1 & x2);
         }
     }
-    // シフト動作
+    /* シフト動作 */
     lfsr_obj->value = (lfsr_obj->value >> 1) | (intarnal_val << (lfsr_obj->dimension - 1));
     return 0;
 }
@@ -88,9 +88,9 @@ char updateLFSR(lfsr_st *lfsr_obj){
  *         -2: 配列のアドレスが不正
  ***************************************************/
 static char createPolynomial(unsigned char dim, unsigned char* poly){
-    // エラー処理：指定された生成多項式の次元数が最大次元数を超過していた場合はエラーを返す
+    /* エラー処理：指定された生成多項式の次元数が最大次元数を超過していた場合はエラーを返す */
     if((dim > MAX_DIMENTION) || (dim < 4)) return -1;
-    // エラー処理：配列のポインタがNULLの場合はエラーを返す
+    /* エラー処理：配列のポインタがNULLの場合はエラーを返す */
     if(poly == 0) return -2;
 
     memset(poly, 0, sizeof(poly));
