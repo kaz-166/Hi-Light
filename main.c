@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <math.h>
 
 #define MAX_DIMENTION 10    // LFSR生成多項式の最大次元数
@@ -18,10 +19,21 @@ void unitTestLFSR(void);
 
 int main(int argc, char** argv){
     if(argc == 1){
-        lfsr_st testObj = {6, 1};
-        printf("LFSR on Generation Mode.\n");
-        for(int i = 0; i < (int)pow(2.0, (double)testObj.dimension); i++){
-            updateLFSR(&testObj);
+        /* ユーザ入力の受け付け */
+        char users_input[4];
+        printf("Please Input the Dimension of LFSR Polynomial.\n");
+        scanf("%255s", users_input);
+
+        /* LFSRによる数列の生成 */
+        lfsr_st lfsr_obj = {(unsigned char)atoi(users_input), 1};
+        printf("Generate Numbers by LFSR.\n");
+        for(int i = 0; i < (int)pow(2.0, lfsr_obj.dimension) - 1; i++){
+            if(updateLFSR(&lfsr_obj) == 0){
+                printf("%d\n", (int)lfsr_obj.value);
+            }else{
+                printf("Invalid Value.\n");
+                break;
+            }
         }
     /* -tオプションを付加するとテストモードで起動する */
     }else if(strncmp(argv[1], "-t", 2) == 0){
@@ -122,7 +134,6 @@ static char createPolynomial(unsigned char dim, unsigned char* poly){
 
 /******************* テストコード *******************/
 void unitTestLFSR(void){
-
     for(int n = 4; n < MAX_DIMENTION; n++){
         lfsr_st testObj = {n, 1};
         int init_value = 1;
