@@ -4,6 +4,7 @@
  *
  ***************************************************/
 #include "lfsr.h"
+#include "util.h"
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
@@ -12,7 +13,7 @@
 #define MAX_DIMENTION 10    // LFSR生成多項式の最大次元数
 #define INVERSE(n) (n == 0) ? 1 : 0
 
-static char createPolynomial(unsigned char dim, unsigned char* poly);
+static char createLFSRPolynomial(unsigned char dim, unsigned char* poly);
 
 /***************************************************
  * [関数名] updateLFSR(lfsr_st lfsr_obj)
@@ -27,18 +28,14 @@ char updateLFSR(lfsr_st *lfsr_obj){
     unsigned char LFSRpolynomial[MAX_DIMENTION] = {0};
 
     /* 生成多項式の取得 */
-    if(createPolynomial(lfsr_obj->dimension, LFSRpolynomial) != 0) return -1;
+    if(createLFSRPolynomial(lfsr_obj->dimension, LFSRpolynomial) != 0) return -1;
 
     for(int i = 0; i < lfsr_obj->dimension; i++){
         if(LFSRpolynomial[i] == 1){
             // [Check!] ビットシフトしたときに0でパディングされることを前提としている実装である。
             // 　　　　　パディングに関してはコンパイラ依存だったような気もするので要確認
             // 排他的論理和の計算
-            unsigned long x1 = intarnal_val;
-            unsigned long x2 = (lfsr_obj->value & (1 << i)) >> i;
-            unsigned long not_x1 = INVERSE(x1);
-            unsigned long not_x2 = INVERSE(x2);
-            intarnal_val = (x1 & not_x2) | (not_x1 & x2);
+            intarnal_val = util_xor(intarnal_val, (lfsr_obj->value & (1 << i)) >> i);
         }
     }
     /* シフト動作 */
@@ -47,7 +44,7 @@ char updateLFSR(lfsr_st *lfsr_obj){
 }
 
 /***************************************************
- * [関数名] createPolynomial(unsigned char dim, unsigned char* poly)
+ * [関数名] createLFSRPolynomial(unsigned char dim, unsigned char* poly)
  * [概要]   生成多項式の係数を返す関数
  *          第二引数のpolyで係数の値を格納する配列を返します。
  * [引数]   dim ：多項式の次元数(0～MAX_DIMENSION)
@@ -56,7 +53,7 @@ char updateLFSR(lfsr_st *lfsr_obj){
  *         -1: 次元数が不正
  *         -2: 配列のアドレスが不正
  ***************************************************/
-static char createPolynomial(unsigned char dim, unsigned char* poly){
+static char createLFSRPolynomial(unsigned char dim, unsigned char* poly){
     /* エラー処理：指定された生成多項式の次元数が最大次元数を超過していた場合はエラーを返す */
     if((dim > MAX_DIMENTION) || (dim < 4)) return -1;
     /* エラー処理：配列のポインタがNULLの場合はエラーを返す */
